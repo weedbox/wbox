@@ -38,7 +38,7 @@ func OpenGolangTemplate(filepath string) (*GolangTemplate, error) {
 	return gt, nil
 }
 
-func (t *GolangTemplate) SetConstValue(constName string, kind token.Token, value string) *ast.File {
+func (t *GolangTemplate) SetConstValue(constName string, kind token.Token, value string) error {
 
 	v := value
 	if kind == token.STRING {
@@ -57,6 +57,171 @@ func (t *GolangTemplate) SetConstValue(constName string, kind token.Token, value
 									Value: v,
 								}
 							}
+						}
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	return nil
+}
+
+func (t *GolangTemplate) RenameType(source string, target string) error {
+
+	ast.Inspect(t.node, func(n ast.Node) bool {
+		if decl, ok := n.(*ast.GenDecl); ok && decl.Tok == token.TYPE {
+			for _, spec := range decl.Specs {
+				if typeSpec, ok := spec.(*ast.TypeSpec); ok {
+					if typeSpec.Name.Name == source {
+						typeSpec.Name.Name = target
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	return nil
+}
+
+func (t *GolangTemplate) RenameFunction(source string, target string) error {
+
+	ast.Inspect(t.node, func(n ast.Node) bool {
+		if decl, ok := n.(*ast.FuncDecl); ok {
+			if decl.Name.Name == source {
+				decl.Name.Name = target
+			}
+		}
+
+		return true
+	})
+
+	return nil
+}
+
+func (t *GolangTemplate) RenameReceiver(source string, target string) error {
+
+	ast.Inspect(t.node, func(n ast.Node) bool {
+		if decl, ok := n.(*ast.FuncDecl); ok {
+			if decl.Recv != nil {
+				for _, field := range decl.Recv.List {
+					if ident, ok := field.Type.(*ast.Ident); ok && ident.Name == source {
+						ident.Name = target
+					} else if starExpr, ok := field.Type.(*ast.StarExpr); ok {
+						if ident, ok := starExpr.X.(*ast.Ident); ok && ident.Name == source {
+							ident.Name = target
+						}
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	return nil
+}
+
+func (t *GolangTemplate) RenameFunctionResult(source string, target string) error {
+
+	ast.Inspect(t.node, func(n ast.Node) bool {
+		if decl, ok := n.(*ast.FuncDecl); ok {
+			if decl.Type.Results != nil {
+				for _, field := range decl.Type.Results.List {
+					if ident, ok := field.Type.(*ast.Ident); ok && ident.Name == source {
+						ident.Name = target
+					} else if starExpr, ok := field.Type.(*ast.StarExpr); ok {
+						if ident, ok := starExpr.X.(*ast.Ident); ok && ident.Name == source {
+							ident.Name = target
+						}
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	return nil
+}
+
+func (t *GolangTemplate) RenameVariableType(source string, target string) error {
+
+	ast.Inspect(t.node, func(n ast.Node) bool {
+		if decl, ok := n.(*ast.GenDecl); ok && decl.Tok == token.VAR {
+			for _, spec := range decl.Specs {
+				if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+					if starExpr, ok := valueSpec.Type.(*ast.StarExpr); ok {
+						if ident, ok := starExpr.X.(*ast.Ident); ok {
+							if ident.Name == source {
+								ident.Name = target
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	return nil
+}
+
+func (t *GolangTemplate) RenameAllocationType(source string, target string) error {
+
+	ast.Inspect(t.node, func(n ast.Node) bool {
+		if expr, ok := n.(*ast.CompositeLit); ok {
+			if ident, ok := expr.Type.(*ast.Ident); ok {
+				if ident.Name == source {
+					ident.Name = target
+				}
+			}
+		}
+
+		return true
+	})
+
+	return nil
+}
+
+func (t *GolangTemplate) RenameFunctionCall(source string, target string) error {
+
+	ast.Inspect(t.node, func(n ast.Node) bool {
+		if callExpr, ok := n.(*ast.CallExpr); ok {
+			if ident, ok := callExpr.Fun.(*ast.Ident); ok {
+				if ident.Name == source {
+					ident.Name = target
+				}
+			}
+		}
+
+		return true
+	})
+
+	return nil
+}
+
+func (t *GolangTemplate) RenameFunctionResultInCallExpr(source string, target string) error {
+
+	ast.Inspect(t.node, func(n ast.Node) bool {
+		if callExpr, ok := n.(*ast.CallExpr); ok {
+			for _, arg := range callExpr.Args {
+				if funcLit, ok := arg.(*ast.FuncLit); ok {
+					if funcLit.Type.Results != nil {
+						for _, result := range funcLit.Type.Results.List {
+							if starExpr, ok := result.Type.(*ast.StarExpr); ok {
+								if ident, ok := starExpr.X.(*ast.Ident); ok {
+									if ident.Name == source {
+										ident.Name = target
+									}
+								}
+							}
+
 						}
 					}
 				}

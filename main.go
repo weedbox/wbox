@@ -24,6 +24,7 @@ func main() {
 	}
 
 	rootCmd.AddCommand(commands.InitCmd)
+	rootCmd.AddCommand(commands.InitModuleCmd)
 	rootCmd.Flags().BoolVar(&verbose, "verbose", false, "Display detailed logs")
 
 	err := rootCmd.Execute()
