@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/weedbox/cli/lib"
+	"github.com/weedbox/wbox/lib"
 )
 
 var InitModuleCmd = &cobra.Command{
