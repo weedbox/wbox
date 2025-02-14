@@ -38,6 +38,11 @@ func OpenGolangTemplate(filepath string) (*GolangTemplate, error) {
 	return gt, nil
 }
 
+func (t *GolangTemplate) SetPackageName(packageName string) error {
+	t.node.Name.Name = ToSnakeCase(packageName)
+	return nil
+}
+
 func (t *GolangTemplate) SetConstValue(constName string, kind token.Token, value string) error {
 
 	v := value

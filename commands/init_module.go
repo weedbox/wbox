@@ -56,6 +56,7 @@ func initModule(moduleName string) error {
 		return err
 	}
 
+	gt.SetPackageName(moduleName)
 	gt.SetConstValue("ModuleName", token.STRING, moduleName)
 	gt.RenameType("TemplateModule", moduleName)
 	gt.RenameReceiver("TemplateModule", moduleName)
