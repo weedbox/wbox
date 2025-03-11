@@ -15,7 +15,7 @@ go install github.com/weedbox/wbox@latest
 ```shell
 mkdir myproject
 cd myproject
-wbox init myproject
+wbox init myproject github.com/myuser/myproject
 ```
 
 ### Createa a new module in the Weedbox project
